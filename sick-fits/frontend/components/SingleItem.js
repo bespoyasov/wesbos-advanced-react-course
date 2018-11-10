@@ -59,7 +59,7 @@ class SingleItem extends Component {
           } = data.item
 
           return <SingleItemStyles>
-            <Head><title>Sick fits | {title}</title></Head>
+            <Head><title>Sick Fits! | {title}</title></Head>
 
             <img src={largeImage} alt={title} />
             <div className='details'>

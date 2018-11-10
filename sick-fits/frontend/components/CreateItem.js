@@ -7,6 +7,11 @@ import Form from './styles/Form'
 import Error from './ErrorMessage'
 import format from '../lib/formatMoney'
 
+import {
+  imageUploadPreset as preset,
+  imageUploadEndpoint as endpoint,
+} from '../config'
+
 
 export const CREATE_ITEM_MUTATION = gql`
   mutation CREATE_ITEM_MUTATION(
@@ -32,8 +37,8 @@ class CreateItem extends Component {
   state = {
     title: 'Some title',
     description: 'Some description',
-    image: 'dog.jpg',
-    largeImage: 'large-dog.jpg',
+    image: '',
+    largeImage: '',
     price: 1500,
   }
 
@@ -43,8 +48,23 @@ class CreateItem extends Component {
     return this.setState(state => ({ [name]: val }))
   }
 
+  uploadFile = async e => {
+    const files = e.target.files
+    const data = new FormData()
+    data.append('file', files[0])
+    data.append('upload_preset', preset)
+
+    const response = await fetch(endpoint, { method: 'POST', body: data })
+    const file = await response.json()
+
+    return this.setState(state => ({ 
+      image: file.secure_url,
+      largeImage: file.eager[0].secure_url,
+    }))
+  }
+
   render() {
-    const {title, price, description} = this.state
+    const {title, price, description, image} = this.state
 
     return (
       <Mutation mutation={CREATE_ITEM_MUTATION} variables={this.state}>
@@ -60,6 +80,22 @@ class CreateItem extends Component {
             <Error error={error} />
             
             <fieldset disabled={loading} aria-busy={loading}>
+              <label>
+                Upload an image
+                <input 
+                  type='file' 
+                  name='file' 
+                  placeholder='Upload an image' 
+                  onChange={this.uploadFile}
+                  required />
+
+                {!!image 
+                  && <img 
+                      alt='Upload preview'
+                      width='200'
+                      src={image} />}
+              </label>
+
               <label>
                 Title
                 <input 

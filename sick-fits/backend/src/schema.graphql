@@ -20,3 +20,11 @@ type Query {
   itemsConnection(where: ItemWhereInput): ItemConnection!
   self: User
 }
+
+# remove fields that should never go to frontend
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  permissions: [Permission!]!
+}

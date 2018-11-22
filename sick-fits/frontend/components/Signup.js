@@ -4,6 +4,7 @@ import gql from 'graphql-tag'
 
 import Form from './styles/Form'
 import Error from './ErrorMessage'
+import {CURRENT_USER_QUERY} from './User'
 
 
 const SIGNUP_MUTATION = gql`
@@ -39,7 +40,10 @@ class Signup extends Component {
     const {email, name, password} = this.state
 
     return (
-      <Mutation mutation={SIGNUP_MUTATION} variables={this.state}>
+      <Mutation 
+        refetchQueries={[{query: CURRENT_USER_QUERY}]}
+        mutation={SIGNUP_MUTATION} 
+        variables={this.state}>
         {(signup, {error, loading}) => {
           return (
             <Form method='post' onSubmit={async e => {

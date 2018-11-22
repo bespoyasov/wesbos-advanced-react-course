@@ -1,4 +1,5 @@
 import SignupForm from '../components/Signup'
+import SigninForm from '../components/Signin'
 import styled from 'styled-components'
 
 const Columns = styled.div`
@@ -10,6 +11,7 @@ const Columns = styled.div`
 const Signup = () => (
   <Columns>
     <SignupForm />
+    <SigninForm />
   </Columns>
 )
 

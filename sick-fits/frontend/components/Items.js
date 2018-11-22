@@ -45,6 +45,11 @@ class Items extends Component {
         <p>Items</p>
         <Query 
           query={ALL_ITEMS_QUERY} 
+          // fetchPolicy="network-only" but its not great
+          // currently there is no way to invalidate only a part of a cache
+          // refetchQueries on a mutation may work, 
+          // but we can't tell which page is to invalidate
+          // so right now there is no perfect solution to this problem
           variables={{ skip: page * perPage - perPage }}>
           {({error, loading, data}) => {
             if (loading) return <p>Loading...</p>

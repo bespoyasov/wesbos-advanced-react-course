@@ -67,7 +67,12 @@ const Mutation = {
     ctx.response.cookie('token', token, cookieSettings)
 
     return user
-  }
+  },
+
+  signout(parent, args, ctx, info) {
+    ctx.response.clearCookie('token')
+    return {message: 'Good bye!'}
+  },
 }
 
 module.exports = Mutation

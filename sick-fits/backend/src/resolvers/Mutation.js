@@ -92,7 +92,6 @@ const Mutation = {
       data: {resetToken, resetTokenExpiry}
     })
 
-    console.log({resetToken})
     // TODO: email them
     return {message: 'Okay!'}
   },

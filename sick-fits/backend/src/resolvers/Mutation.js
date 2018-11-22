@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const {randomBytes} = require('crypto')
+const {promisify} = require('util')
 
 const MS_IN_YEAR = 1000 * 60 * 60 * 24 * 365
 const cookieSettings = {
@@ -73,6 +75,71 @@ const Mutation = {
     ctx.response.clearCookie('token')
     return {message: 'Good bye!'}
   },
+
+  async requestReset(parent, args, ctx, info) {
+    const {email} = args
+
+    // check if real user
+    const user = await ctx.db.query.user({ where: {email} })
+    if (!user) throw new Error(`No user found for email ${email}`)
+
+    // set a reset token and expiry
+    const randomBytesPromisified = promisify(randomBytes)
+    const resetToken = (await randomBytesPromisified(20)).toString('hex')
+    const resetTokenExpiry = Date.now() + 3600000
+    const res = await ctx.db.mutation.updateUser({
+      where: {email},
+      data: {resetToken, resetTokenExpiry}
+    })
+
+    console.log({resetToken})
+    // TODO: email them
+    return {message: 'Okay!'}
+  },
+
+  async resetPassword(parent, args, ctx, info) {
+    const {
+      password, 
+      confirmPassword,
+      resetToken,
+    } = args
+    
+    // check if passwords match
+    if (password !== confirmPassword) {
+      throw new Error('Passwords don\'t match')
+    }
+
+    // check if its a legit resetToken and not expired
+    const [user] = await ctx.db.query.users({
+      where: {
+        resetToken,
+        resetTokenExpiry_gte: Date.now() - 3600000
+      }
+    })
+
+    if (!user) throw new Error('Token is either invalid or expired')
+    
+    // has new password
+    const passwordHash = await bcrypt.hash(password, 10)
+    
+    // save new password, remove old resetToken fields
+    const updatedUser = await ctx.db.mutation.updateUser({
+      where: {email: user.email},
+      data: {
+        password: passwordHash,
+        resetToken: null,
+        resetTokenExpiry: null,
+      }
+    })
+
+    // generate jwt
+    const token = jwt.sign({userId: updatedUser.id}, process.env.APP_SECRET)
+
+    // set as cookie
+    ctx.response.cookie('token', token, cookieSettings)
+
+    return updatedUser
+  }
 }
 
 module.exports = Mutation

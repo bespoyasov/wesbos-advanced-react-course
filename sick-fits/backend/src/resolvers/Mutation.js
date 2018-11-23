@@ -155,7 +155,7 @@ const Mutation = {
     return updatedUser
   },
 
-  async updatePermission(parent, args, ctx, info) {
+  async updatePermissions(parent, args, ctx, info) {
     const {userId} = ctx.request
 
     // if they are logged in
@@ -171,7 +171,7 @@ const Mutation = {
 
     return ctx.db.mutation.updateUser({
       // we can update someone else, not current
-      where: { id: args.userId }
+      where: { id: args.userId },
       // cause of enum
       data: {
         permissions: { set: args.permissions }

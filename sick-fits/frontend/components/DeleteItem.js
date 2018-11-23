@@ -32,7 +32,9 @@ class DeleteItem extends Component {
         variables={{id}}>
         {(deleteItem, {error}) => {
           return <button onClick={() => {
-            if (confirm('Are you sure?')) deleteItem()
+            if (confirm('Are you sure?')) {
+              deleteItem().catch(err => alert(err.message))
+            }
           }}>{children}</button>
         }}
       </Mutation>

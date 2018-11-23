@@ -21,6 +21,7 @@ type Query {
   item(where: ItemWhereUniqueInput!): Item
   itemsConnection(where: ItemWhereInput): ItemConnection!
   self: User
+  users: [User]!
 }
 
 # remove fields that should never go to frontend

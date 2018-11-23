@@ -1,5 +1,6 @@
 import {Query} from 'react-apollo'
 import gql from 'graphql-tag'
+import PropTypes from 'prop-types'
 
 import Error from './ErrorMessage'
 import Table from './styles/Table'
@@ -46,7 +47,9 @@ const Permissions = props => (
 
           <tbody>
             {data.users.map(user => 
-              <User key={user.id} user={user} />)}
+              <UserPermissions 
+                key={user.id} 
+                user={user} />)}
           </tbody>
         </Table>
       </div>
@@ -57,19 +60,52 @@ const Permissions = props => (
 export default Permissions
 
 
-const User = ({user}) => (  
-  <tr>
-    <td>{user.name}</td>
-    <td>{user.email}</td>
-    
-    {possiblePermissions.map(permission => (
-      <td>
-        <label>
-          <input type='checkbox' />
-        </label>
-      </td>
-    ))}
+class UserPermissions extends React.Component {
+  static propTypes = {
+    user: PropTypes.shape({
+      name: PropTypes.string,
+      email: PropTypes.string,
+      id: PropTypes.string,
+      permissions: PropTypes.array,
+    }).isRequired
+  }
 
-    <td><SickButton>Update</SickButton></td>
-  </tr>
-)
+  state = {
+    permissions: this.props.user.permissions,
+  }
+
+  handlePermissionChange = e => {
+    const {checked, value} = e.target
+    let updated = [...this.state.permissions]
+    if (checked) updated.push(value)
+    else updated = updated.filter(p => p !== value)
+
+    return this.setState(state => ({ 
+      permissions: updated }))
+  }
+
+  render() {
+    const {user} = this.props
+
+    return (
+      <tr>
+        <td>{user.name}</td>
+        <td>{user.email}</td>
+        
+        {possiblePermissions.map(permission => (
+          <td key={permission}>
+            <label>
+              <input 
+                type='checkbox'
+                value={permission}
+                checked={this.state.permissions.includes(permission)}
+                onChange={this.handlePermissionChange} />
+            </label>
+          </td>
+        ))}
+
+        <td><SickButton>Update</SickButton></td>
+      </tr>
+    )
+  }
+}

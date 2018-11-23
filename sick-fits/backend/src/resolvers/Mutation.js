@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const {randomBytes} = require('crypto')
 const {promisify} = require('util')
 const {transport, makeNiceEmail} = require('../mail')
+const {hasPermission} = require('../utils')
 
 const MS_IN_YEAR = 1000 * 60 * 60 * 24 * 365
 const cookieSettings = {
@@ -152,7 +153,31 @@ const Mutation = {
     ctx.response.cookie('token', token, cookieSettings)
 
     return updatedUser
-  }
+  },
+
+  async updatePermission(parent, args, ctx, info) {
+    const {userId} = ctx.request
+
+    // if they are logged in
+    if (!userId) throw new Error('You must be logged in')
+
+    // query current user
+    const currentUser = await ctx.db.query.user({
+      where: {id: userId}
+    }, info)
+
+    // if they have permission to do that
+    hasPermission(currentUser, ['ADMIN', 'PERMISSIONUPDATE'])
+
+    return ctx.db.mutation.updateUser({
+      // we can update someone else, not current
+      where: { id: args.userId }
+      // cause of enum
+      data: {
+        permissions: { set: args.permissions }
+      },
+    }, info)
+  },
 }
 
 module.exports = Mutation

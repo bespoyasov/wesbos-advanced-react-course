@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const {randomBytes} = require('crypto')
 const {promisify} = require('util')
+const {transport, makeNiceEmail} = require('../mail')
 
 const MS_IN_YEAR = 1000 * 60 * 60 * 24 * 365
 const cookieSettings = {
@@ -92,7 +93,14 @@ const Mutation = {
       data: {resetToken, resetTokenExpiry}
     })
 
-    // TODO: email them
+    // email them
+    // const mailResponse = await transport.sendMail({
+    //   to: email,
+    //   from: 'bespoyasov@me.com',
+    //   subject: 'Password reset',
+    //   html: makeNiceEmail(`Your password reset link: <a href='${process.env.FRONTEND_URL}/reset?resetToken=${resetToken}'>click to reset</a>`)
+    // })
+
     return {message: 'Okay!'}
   },
 

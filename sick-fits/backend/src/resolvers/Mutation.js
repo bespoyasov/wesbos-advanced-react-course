@@ -11,10 +11,16 @@ const cookieSettings = {
 }
 
 const Mutation = {
-  // TODO: check if they are logged in
   async createItem(parent, args, ctx, info) {
+    if (!ctx.request.userId) throw new Error('You must be logged in')
     return await ctx.db.mutation.createItem({
-      data: {...args}
+      data: {
+        // relationship to user in prisma:
+        user: {
+          connect: { id: ctx.request.userId }
+        },
+        ...args
+      }
     }, info)
   },
 

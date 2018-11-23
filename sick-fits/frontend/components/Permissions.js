@@ -27,23 +27,6 @@ const ALL_USERS_QUERY = gql`
 `
 
 
-const User = ({user}) => (  
-  <tr>
-    <td>{user.name}</td>
-    <td>{user.email}</td>
-    
-    {possiblePermissions.map(permission => (
-      <td>
-        <label>
-          <input type='checkbox' />
-        </label>
-      </td>
-    ))}
-
-    <td><SickButton>Update</SickButton></td>
-  </tr>
-)
-
 const Permissions = props => (
   <Query query={ALL_USERS_QUERY}>
     {({data, loading, error}) => (
@@ -72,3 +55,21 @@ const Permissions = props => (
 )
 
 export default Permissions
+
+
+const User = ({user}) => (  
+  <tr>
+    <td>{user.name}</td>
+    <td>{user.email}</td>
+    
+    {possiblePermissions.map(permission => (
+      <td>
+        <label>
+          <input type='checkbox' />
+        </label>
+      </td>
+    ))}
+
+    <td><SickButton>Update</SickButton></td>
+  </tr>
+)

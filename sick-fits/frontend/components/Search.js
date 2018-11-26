@@ -1,5 +1,5 @@
 import React from 'react'
-import Downshift from 'downshift'
+import Downshift, {resetIdCounter} from 'downshift'
 import Router from 'next/router'
 import {ApolloConsumer} from 'react-apollo'
 import gql from 'graphql-tag'
@@ -26,6 +26,13 @@ const SEARCH_ITEMS_QUERY = gql`
   }
 `
 
+const routeToItem = (item) => {
+  Router.push({
+    pathname: `/item/`,
+    query: {id: item.id},
+  })
+}
+
 class AutoComplete extends React.Component {
 
   state = {
@@ -49,30 +56,59 @@ class AutoComplete extends React.Component {
   }, 350)
 
   render() {
+    resetIdCounter()
+    const {items=[], loading} = this.state
+
     return (
       <SearchStyles>
-        <div>
-          <ApolloConsumer>
-            {(client) =>
-              <input 
-                type='search'
-                onChange={e => {
-                  e.persist()
-                  this.onChange(e, client)
-                }} />}
-          </ApolloConsumer>
-          <DropDown>
-            {this.state.items.map(item =>
-              <DropDownItem key={item.id}>
-                <img 
-                  src={item.image} 
-                  alt={item.title}
-                  width={50} />
+        <Downshift 
+          onChange={routeToItem}
+          itemToString={item => 
+            item === null ? '' : item.title}>
+          {({
+            getInputProps, 
+            getItemProps, 
+            highlightedIndex,
+            inputValue,
+            isOpen,
+          }) => (
+            <div>
+              <ApolloConsumer>
+                {(client) =>
+                  <input {...getInputProps({
+                    id: 'search',
+                    type: 'search',
+                    placeholder: 'Search for a product',
+                    className: this.state.loading ? 'loading' : '',
+                    onChange: e => {
+                      e.persist()
+                      this.onChange(e, client)
+                    },
+                  })} />}
+              </ApolloConsumer>
+              
+              {isOpen 
+                && <DropDown>
+                  {items.map((item, index) =>
+                    <DropDownItem 
+                      {...getItemProps({item})}
+                      highlighted={index === highlightedIndex}
+                      key={item.id}>
+                      <img 
+                        src={item.image} 
+                        alt={item.title}
+                        width={50} />
+      
+                      {item.title}
+                    </DropDownItem>)}
 
-                {item.title}
-              </DropDownItem>)}
-          </DropDown>
-        </div>
+                  {!items.length && !loading && (
+                    <DropDownItem>Nothing found</DropDownItem>
+                  )}
+                </DropDown>}
+            </div>
+          )}
+        </Downshift>
       </SearchStyles>
     )
   }

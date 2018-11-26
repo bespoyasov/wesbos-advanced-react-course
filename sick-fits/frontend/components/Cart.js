@@ -2,6 +2,11 @@ import React from 'react'
 import {Query, Mutation} from 'react-apollo'
 import gql from 'graphql-tag'
 
+import User from './User'
+import CartItem from './CartItem'
+import calcTotalPrice from '../lib/calcTotalPrice'
+import formatMoney from '../lib/formatMoney'
+
 import CartStyles from './styles/CartStyles'
 import Supreme from './styles/Supreme'
 import CloseButton from './styles/CloseButton'
@@ -20,28 +25,44 @@ export const TOGGLE_CART_MUTATION = gql`
 `
 
 const Cart = props => {
-  return <Mutation mutation={TOGGLE_CART_MUTATION}>
-    {(toggleCart) => (
-      <Query query={LOCAL_STATE_QUERY}>
-        {({data}) => (
-          <CartStyles open={data.cartOpen}>
-            <header>
-              <CloseButton 
-                onClick={toggleCart}
-                title='close'>&times;</CloseButton>
-              <Supreme>Your cart</Supreme>
-              <p>You have __ items in your cart</p>
-            </header>
-    
-            <footer>
-              <p>$10.10</p>
-              <SickButton>Checkout</SickButton>
-            </footer>
-          </CartStyles>
-        )}
-      </Query>
-    )}
-  </Mutation>
+  return <User>
+    {({data: {self}}) => {
+      if (!self) return null
+
+      return (
+        <Mutation mutation={TOGGLE_CART_MUTATION}>
+          {(toggleCart) => (
+            <Query query={LOCAL_STATE_QUERY}>
+              {({data}) => (
+                <CartStyles open={data.cartOpen}>
+                  <header>
+                    <CloseButton 
+                      onClick={toggleCart}
+                      title='close'>&times;</CloseButton>
+                    <Supreme>{self.name}'s cart</Supreme>
+                    <p>You have {self.cart.length} item{self.cart.length === 1 ? '' : 's'} in your cart</p>
+                  </header>
+
+                  <ul>
+                    {self.cart.map(cartItem => 
+                      <CartItem 
+                        cartItem={cartItem}
+                        key={cartItem.id} />)}
+                  </ul>
+
+          
+                  <footer>
+                    <p>{formatMoney(calcTotalPrice(self.cart))}</p>
+                    <SickButton>Checkout</SickButton>
+                  </footer>
+                </CartStyles>
+              )}
+            </Query>
+          )}
+        </Mutation>
+      )
+    }}
+  </User>
 }
 
 export default Cart

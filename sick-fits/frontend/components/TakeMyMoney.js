@@ -32,6 +32,7 @@ const CREATE_ORDER_MUTATION = gql`
 
 // test card number
 // 4242 4242 4242 4242
+// https://dashboard.stripe.com/test/payments
 
 class TakeMyMoney extends React.Component {
 

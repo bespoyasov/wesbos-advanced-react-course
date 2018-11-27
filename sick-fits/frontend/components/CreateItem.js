@@ -48,6 +48,7 @@ class CreateItem extends Component {
     return this.setState(state => ({ [name]: val }))
   }
 
+  // https://cloudinary.com/console
   uploadFile = async e => {
     const files = e.target.files
     const data = new FormData()

@@ -4,6 +4,7 @@ const {randomBytes} = require('crypto')
 const {promisify} = require('util')
 const {transport, makeNiceEmail} = require('../mail')
 const {hasPermission} = require('../utils')
+const stripe = require('../stripe')
 
 const MS_IN_YEAR = 1000 * 60 * 60 * 24 * 365
 const cookieSettings = {
@@ -231,6 +232,65 @@ const Mutation = {
     return ctx.db.mutation.deleteCartItem({
       where: { id: args.id }
     }, info)
+  },
+
+  async createOrder(parent, args, ctx, info) {
+    const {userId} = ctx.request
+
+    // query current user and make sure they are logged in
+    if (!userId) throw new Error('You must be logged in')
+    
+    const user = await ctx.db.query.user({
+      where: {id: userId}
+    }, `{
+      id name email cart { 
+        id quantity item { 
+          title price id description image largeImage
+    }}}`)
+    
+    // recalc the total for the price
+    const amount = user.cart.reduce((tally, cartItem) => 
+      tally + cartItem.item.price * cartItem.quantity, 0)
+
+    // creat the stripe charge 
+    const charge = await stripe.charges.create({
+      amount,
+      currency: 'USD',
+      source: args.token,
+    })
+
+    // convert the CartItems to OrderItems
+    const orderItems = user.cart.map(cartItem => {
+      const orderItem = {
+        ...cartItem.item,
+        quantity: cartItem.quantity,
+        user: {connect: {id: userId}},
+      }
+
+      delete orderItem.id
+      return orderItem
+    })
+
+    // create the Order
+    const order = await ctx.db.mutation.createOrder({
+      data: {
+        total: charge.amount,
+        charge: charge.id,
+        // just pass an array of [OrderItem], by create:
+        items: {create: orderItems},
+        user: {connect: {id: userId}}
+      }
+    })
+
+    // clear user's cart, delete CartItems
+    const cartItemIds = user.cart.map(cartItem => cartItem.id)
+    await ctx.db.mutation.deleteManyCartItems({
+      // beautiful
+      where: {id_in: cartItemIds}
+    })
+
+    // return the Order to the client
+    return order
   },
 }
 

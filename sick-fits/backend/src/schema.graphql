@@ -27,6 +27,7 @@ type Query {
   self: User
   users: [User]!
   order(id: ID!): Order
+  orders(orderBy: OrderOrderByInput): [Order]!
 }
 
 # remove fields that should never go to frontend

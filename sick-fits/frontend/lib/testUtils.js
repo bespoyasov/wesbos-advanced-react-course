@@ -53,6 +53,18 @@ const fakeCartItem = overrides => ({
   ...overrides,
 });
 
+
+const notSignedInMocks = query => [{
+  request: {query},
+  result: {data: {self: null}}
+}]
+
+const signedInMocks = query => [{
+  request: {query},
+  result: {data: {self: fakeUser()}}
+}]
+
+
 // Fake LocalStorage
 class LocalStorageMock {
   constructor() {
@@ -83,4 +95,7 @@ export {
   fakeCartItem,
   fakeOrder,
   fakeOrderItem,
+
+  notSignedInMocks,
+  signedInMocks,
 };

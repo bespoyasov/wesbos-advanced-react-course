@@ -1,22 +1,15 @@
 import {MockedProvider} from 'react-apollo/test-utils'
 import {mount} from 'enzyme'
-import toJSON from 'enzyme-to-json'
 import wait from 'waait'
 
-import {fakeUser} from '../lib/testUtils'
+import {
+  fakeUser,
+  signedInMocks,
+  notSignedInMocks,
+} from '../lib/testUtils'
 
 import PleaseSignin from '../components/PleaseSignin'
 import {CURRENT_USER_QUERY as query} from '../components/User'
-
-const notSignedInMocks = [{
-  request: {query},
-  result: {data: {self: null}}
-}]
-
-const signedInMocks = [{
-  request: {query},
-  result: {data: {self: fakeUser()}}
-}]
 
 const Hey = () => <p>Hey!</p>
 
@@ -24,7 +17,7 @@ const Hey = () => <p>Hey!</p>
 describe('<PleaseSignin />', () => {
   it('renders popup to logged out users', async () => {
     const wrapper = mount(
-      <MockedProvider mocks={notSignedInMocks}>
+      <MockedProvider mocks={notSignedInMocks(query)}>
         <PleaseSignin>
           <Hey />
         </PleaseSignin>
@@ -40,7 +33,7 @@ describe('<PleaseSignin />', () => {
 
   it('renders the child component when user is signed in', async () => {
     const wrapper = mount(
-      <MockedProvider mocks={signedInMocks}>
+      <MockedProvider mocks={signedInMocks(query)}>
         <PleaseSignin>
           <Hey />
         </PleaseSignin>

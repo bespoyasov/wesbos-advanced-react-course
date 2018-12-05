@@ -6,7 +6,7 @@ import Form from './styles/Form'
 import Error from './ErrorMessage'
 
 
-const REQUEST_RESET_MUTATION = gql`
+export const REQUEST_RESET_MUTATION = gql`
   mutation REQUEST_RESET_MUTATION($email: String!) {
     requestReset(email: $email) {
       message
@@ -37,7 +37,7 @@ class RequestReset extends Component {
         variables={this.state}>
         {(requestReset, {error, loading, called}) => {
           return (
-            <Form method='post' onSubmit={async e => {
+            <Form method='post' data-test="request-reset" onSubmit={async e => {
               e.preventDefault()
               await requestReset()
             }}>

@@ -16,7 +16,7 @@ const totalItems = (cart) =>
   cart.reduce((tally, cartItem) => tally + cartItem.quantity, 0)
 
 
-const CREATE_ORDER_MUTATION = gql`
+export const CREATE_ORDER_MUTATION = gql`
   mutation CREATE_ORDER_MUTATION($token: String!) {
     createOrder(token: $token) {
       id
@@ -54,27 +54,31 @@ class TakeMyMoney extends React.Component {
   render() {
     return (
       <User>
-        {({data: {self}}) => (
-          <Mutation 
-            refetchQueries={[{query: CURRENT_USER_QUERY}]}
-            mutation={CREATE_ORDER_MUTATION}>
-            {(createOrder, {data, loading, error}) => (
-              <StripeCheckout
-                description={`Order of ${totalItems(self.cart)} items`}
-                amount={calcTotalPrice(self.cart)}
-                name='Sick Fits!'
-                image={self.cart[0] 
-                  && self.cart[0].item 
-                  && self.cart[0].item.image}
-                stripeKey='pk_test_BSjaTiaHLkX0G5j19q4UgLcc'
-                currency='USD'
-                email={self.email}
-                token={res => this.onToken(res, createOrder)}>
-                {this.props.children}
-              </StripeCheckout>
-            )}
-          </Mutation>
-        )}
+        {({data: {self}, loading}) => {
+          if (loading) return null
+
+          return (
+            <Mutation 
+              refetchQueries={[{query: CURRENT_USER_QUERY}]}
+              mutation={CREATE_ORDER_MUTATION}>
+              {(createOrder, {data, loading, error}) => (
+                <StripeCheckout
+                  description={`Order of ${totalItems(self.cart)} items`}
+                  amount={calcTotalPrice(self.cart)}
+                  name='Sick Fits!'
+                  image={self.cart[0] 
+                    && self.cart[0].item 
+                    && self.cart[0].item.image}
+                  stripeKey='pk_test_BSjaTiaHLkX0G5j19q4UgLcc'
+                  currency='USD'
+                  email={self.email}
+                  token={res => this.onToken(res, createOrder)}>
+                  {this.props.children}
+                </StripeCheckout>
+              )}
+            </Mutation>
+          )
+        }}
       </User>
     )
   }

@@ -38,3 +38,6 @@ server.start({
 }, deets => {
   console.log(`Server running on port ${deets.port}`)
 })
+
+// heroku: 
+// https://dashboard.heroku.com/apps/bespoy-wesbos-course-yoga-prod/settings

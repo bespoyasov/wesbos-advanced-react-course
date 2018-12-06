@@ -5,3 +5,6 @@ export const perPage = 4;
 
 export const imageUploadPreset = 'sickfits'
 export const imageUploadEndpoint = 'https://api.cloudinary.com/v1_1/bespoyasov/image/upload/'
+
+// heroku:
+// https://bespoy-wesbos-course-next-prod.herokuapp.com
